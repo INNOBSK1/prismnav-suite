@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { validRecoveryCode, validNewPassword } from '@/lib/password-recovery';
 import landscape from '@/assets/green-horizon.jpg';
 import logoAsset from '@/assets/nimalunda-login-logo.asset.json';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function PasswordRecovery() {
   const [email, setEmail] = useState('');
@@ -20,21 +21,20 @@ export default function PasswordRecovery() {
   const [notice, setNotice] = useState('');
   const [lastSent, setLastSent] = useState(0);
   const navigate = useNavigate();
+  const { recoveryVerified } = useAuth();
+  const [codeVerified, setCodeVerified] = useState(false);
+
+  useEffect(() => {
+    if (recoveryVerified) setStep('password');
+  }, [recoveryVerified]);
 
   useEffect(() => {
     const hash = new URLSearchParams(window.location.hash.slice(1));
-    const recoveryLink = hash.get('type') === 'recovery';
     const linkError = hash.get('error_description');
     if (linkError) setError(linkError);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setStep('password');
     });
-    if (recoveryLink) {
-      supabase.auth.getUser().then(({ data, error: authError }) => {
-        if (data.user && !authError) setStep('password');
-        else setError('This reset link is invalid or expired. Request another email.');
-      });
-    }
     return () => subscription.unsubscribe();
   }, []);
 
@@ -77,9 +77,11 @@ export default function PasswordRecovery() {
         const { data, error: verifyError } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'recovery' });
         if (verifyError) throw verifyError;
         if (!data.session) throw new Error('The code could not be verified. Request another recovery email.');
+        setCodeVerified(true);
         setCode('');
         setStep('password');
       } else {
+        if (!recoveryVerified && !codeVerified) throw new Error('Verify the recovery code or open your reset link first.');
         const { error: updateError } = await supabase.auth.updateUser({ password });
         if (updateError) throw updateError;
         await supabase.auth.signOut();
