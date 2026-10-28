@@ -13,6 +13,7 @@ interface AuthContextType {
   canAccess: boolean;
   accountError: string;
   refreshRegistration: () => Promise<void>;
+  recoveryVerified: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   canAccess: false,
   accountError: '',
   refreshRegistration: async () => {},
+  recoveryVerified: false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -37,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [approved, setApproved] = useState(false);
   const [consented, setConsented] = useState(false);
   const [accountError, setAccountError] = useState('');
+  const [recoveryVerified, setRecoveryVerified] = useState(false);
 
   const refreshRegistration = async () => {
     if (!user) return;
@@ -78,7 +81,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (nextSession !== undefined) setSession(nextSession);
       setLoading(false);
     };
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === 'PASSWORD_RECOVERY') setRecoveryVerified(true);
+      if (event === 'SIGNED_OUT') setRecoveryVerified(false);
       setLoading(true);
       // Keep network validation outside the auth listener's internal lock.
       window.setTimeout(() => { if (active) void validateUser(nextSession); }, 0);
@@ -88,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, registrationLoading, approved, consented, canAccess: accountCanAccess(approved, consented), accountError, refreshRegistration }}>
+    <AuthContext.Provider value={{ user, session, loading, registrationLoading, approved, consented, canAccess: accountCanAccess(approved, consented), accountError, refreshRegistration, recoveryVerified }}>
       {children}
     </AuthContext.Provider>
   );
