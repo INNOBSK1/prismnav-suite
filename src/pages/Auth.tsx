@@ -15,7 +15,7 @@ import { GoogleTranslate } from '@/components/GoogleTranslate';
 import { toast } from 'sonner';
 import { Eye, EyeOff, User, Lock, Mail, ShieldCheck, ArrowRight } from 'lucide-react';
 import landscape from '@/assets/green-horizon.jpg';
-import { signInWithGoogle } from '@/lib/google-sign-in';
+import { lovable } from '@/integrations/lovable/index';
 import { useTermsHtml, termsArticleCls } from '@/components/TermsText';
 import logoUrl from '@/assets/nimalunda-logo.png';
 const logoAsset = { url: logoUrl };
@@ -160,7 +160,10 @@ export default function Auth() {
     }
     setIsLoading(true);
     try {
-      const result = await signInWithGoogle();
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
+        extraParams: { prompt: 'select_account' },
+      });
       if (result.error) toast.error(result.error.message || t.auth.unexpectedError);
     } catch {
       toast.error(t.auth.unexpectedError);
