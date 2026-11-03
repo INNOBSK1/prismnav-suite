@@ -15,9 +15,8 @@ import { GoogleTranslate } from '@/components/GoogleTranslate';
 import { toast } from 'sonner';
 import { Eye, EyeOff, User, Lock, Mail, ShieldCheck, ArrowRight } from 'lucide-react';
 import landscape from '@/assets/green-horizon.jpg';
-import { lovable } from '@/integrations/lovable/index';
 import { useTermsHtml, termsArticleCls } from '@/components/TermsText';
-import logoAsset from '@/assets/nimalunda-login-logo.asset.json';
+import logo from '@/assets/nimalunda-logo.png';
 import { canCreateAccount } from '@/lib/signup-agreement';
 
 const BRAND = 'NIMALUNDA';
@@ -157,11 +156,14 @@ export default function Auth() {
     }
     setIsLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
-        extraParams: { prompt: 'select_account' },
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth`,
+          queryParams: { prompt: 'select_account' },
+        },
       });
-      if (result.error) toast.error(result.error.message || t.auth.unexpectedError);
+      if (error) toast.error(error.message || t.auth.unexpectedError);
     } catch {
       toast.error(t.auth.unexpectedError);
     } finally {
@@ -224,7 +226,7 @@ export default function Auth() {
       <main className="mx-auto flex w-full max-w-md flex-col px-5 pb-10 pt-2 sm:px-4">
         <div className="auth-frame w-full flex flex-col gap-4 rounded-lg border border-border bg-card/95 p-5 backdrop-blur-md sm:p-7">
           <div className="text-center space-y-3">
-            <img src={logoAsset.url} alt="NIMALUNDA logo" className="mx-auto h-14 w-14 rounded-full ring-1 ring-primary/40" />
+            <img src={logo} alt="NIMALUNDA logo" className="mx-auto h-14 w-14 rounded-full ring-1 ring-primary/40" />
             <h1 translate="no" className="notranslate font-display text-3xl font-semibold text-foreground tracking-normal">{BRAND}</h1>
             <p className="text-sm text-muted-foreground">Digitally Ensuring Prosperity</p>
           </div>
