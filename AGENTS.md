@@ -1,4 +1,5 @@
 # Architecture rules
+- On external production hosting, configure the existing managed OAuth library with this project's Lovable-hosted broker; keep generated integrations untouched and preserve the production origin for returns because external hosts do not implement Lovable's OAuth endpoints.
 - Render About Us through the existing SiteViewer route, not the dashboard tool cards, so iframe permissions and language propagation remain shared.
 - Keep auth a single scrollable, logo-led dark screen; scope its landscape and green-horizon colors to semantic auth tokens so other pages retain theme support.
 - Share signup agreement validation between email and Google signup controls so neither signup action bypasses reading and acceptance.
