@@ -17,7 +17,8 @@ import { Eye, EyeOff, User, Lock, Mail, ShieldCheck, ArrowRight } from 'lucide-r
 import landscape from '@/assets/green-horizon.jpg';
 import { lovable } from '@/integrations/lovable/index';
 import { useTermsHtml, termsArticleCls } from '@/components/TermsText';
-import logoAsset from '@/assets/nimalunda-login-logo.asset.json';
+import logoUrl from '@/assets/nimalunda-logo.png';
+const logoAsset = { url: logoUrl };
 import { canCreateAccount } from '@/lib/signup-agreement';
 import { PhoneSignIn } from '@/components/PhoneSignIn';
 
