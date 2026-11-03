@@ -19,6 +19,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { useTermsHtml, termsArticleCls } from '@/components/TermsText';
 import logoAsset from '@/assets/nimalunda-login-logo.asset.json';
 import { canCreateAccount } from '@/lib/signup-agreement';
+import { PhoneSignIn } from '@/components/PhoneSignIn';
 
 const BRAND = 'NIMALUNDA';
 
@@ -259,14 +260,21 @@ export default function Auth() {
 
           {/* Auth Tabs */}
           <Tabs value={authMode} onValueChange={value => { setAuthMode(value); setConfirmationSent(false); setAuthNotice(''); }} className="w-full">
-            <TabsList className="grid h-10 w-full grid-cols-2 rounded-lg bg-primary/10 p-0.5">
+            <TabsList className="grid h-10 w-full grid-cols-3 rounded-lg bg-primary/10 p-0.5">
               <TabsTrigger value="signin" className="rounded-md text-sm font-medium data-[state=active]:text-primary">
                 {t.auth.signIn}
               </TabsTrigger>
               <TabsTrigger value="signup" className="rounded-md text-sm font-medium data-[state=active]:text-primary">
                 {t.auth.signUp}
               </TabsTrigger>
+              <TabsTrigger value="phone" className="rounded-md text-sm font-medium data-[state=active]:text-primary">
+                Phone
+              </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="phone" className="mt-5">
+              <PhoneSignIn />
+            </TabsContent>
 
             {/* SIGN IN TAB */}
             <TabsContent value="signin" className="mt-5">
