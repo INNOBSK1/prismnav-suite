@@ -2,9 +2,9 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading, registrationLoading, canAccess } = useAuth();
+  const { user, loading } = useAuth();
 
-  if (loading || registrationLoading) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -12,7 +12,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user || !canAccess) {
+  if (!user) {
     return <Navigate to="/auth" replace />;
   }
 

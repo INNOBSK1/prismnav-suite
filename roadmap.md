@@ -3,10 +3,8 @@
 - [x] Clear signup terms and agreement presentation.
 - [x] Sidebar-only embedded About Us and logout.
 - [x] Verify the page and navigation flows.
-- [x] Restyle login using the uploaded green-horizon reference.
-- [x] Adapt uploaded ZIP styling with a compact, non-full-screen signup panel.
+- [ ] Restyle login using the uploaded green-horizon reference.
+- [ ] Adapt uploaded ZIP styling with a compact, non-full-screen signup panel.
 - [ ] Check Google login and signup agreement controls.
 - [ ] Explain secure setup of the uploaded Google credentials.
 - [ ] Add emailed reset-code recovery and a public new-password page.
-- [ ] Finish account confirmation, Google signup consent, and login states.
-- [ ] Verify email and Google account flows and report delivery limitations.

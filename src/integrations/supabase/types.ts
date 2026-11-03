@@ -14,24 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      consents: {
-        Row: {
-          accepted_at: string
-          terms_version: string
-          user_id: string
-        }
-        Insert: {
-          accepted_at?: string
-          terms_version: string
-          user_id: string
-        }
-        Update: {
-          accepted_at?: string
-          terms_version?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       downloads: {
         Row: {
           created_at: string
@@ -112,8 +94,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      accept_signup_terms: { Args: never; Returns: undefined }
-      account_can_access: { Args: never; Returns: boolean }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

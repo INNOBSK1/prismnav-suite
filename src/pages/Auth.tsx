@@ -38,17 +38,15 @@ export default function Auth() {
   const [termsRead, setTermsRead] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [authMode, setAuthMode] = useState('signin');
-  const [confirmationSent, setConfirmationSent] = useState(false);
-  const [authNotice, setAuthNotice] = useState('');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, loading, registrationLoading, approved, consented, canAccess, accountError, refreshRegistration } = useAuth();
+  const { user } = useAuth();
   const { t } = useLanguage();
   const termsHtml = useTermsHtml();
 
   useEffect(() => {
-    if (user && canAccess) navigate('/', { replace: true });
-  }, [user, canAccess, navigate]);
+    if (user) navigate('/', { replace: true });
+  }, [user, navigate]);
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
@@ -107,17 +105,7 @@ export default function Auth() {
         },
       });
       if (error) toast.error(error.message.includes('already registered') ? t.auth.accountExists : error.message);
-      else {
-        setPassword('');
-        if (data.session) {
-          const { error: consentError } = await supabase.rpc('accept_signup_terms');
-          if (consentError) throw consentError;
-          await refreshRegistration();
-        } else {
-          setConfirmationSent(true);
-          setAuthNotice('Check your email to confirm your NIMALUNDA account. New accounts also need approval before accessing the tools.');
-        }
-      }
+      else toast.success(data.session ? t.auth.accountCreated : `${t.auth.accountCreated} Check your email to confirm.`);
     } catch {
       toast.error(t.auth.unexpectedError);
     } finally {
@@ -140,7 +128,18 @@ export default function Auth() {
       if (error) {
         toast.error(error.message);
       } else {
-        setAuthNotice('Confirmation email requested. Check your inbox and spam folder.');
+        await supabase.functions.invoke('send-email', {
+          body: {
+            to: email.trim(),
+            subject: `Confirm your ${BRAND} account`,
+            html: `<div style="font-family:DM Sans,Arial,sans-serif;padding:24px;color:#1b1b1b">
+              <h2 style="color:#166534;margin:0 0 12px">Welcome to ${BRAND} 🌱</h2>
+              <p>We just re-sent your confirmation email. Please check your inbox (and spam folder) for the link to verify your account.</p>
+              <p>If you didn't request this, you can safely ignore this message.</p>
+              <p style="margin-top:24px;color:#666;font-size:13px">— The ${BRAND} Team</p>
+            </div>`,
+          },
+        });
         toast.success('Confirmation email sent! Check your inbox.');
       }
     } catch {
@@ -170,17 +169,6 @@ export default function Auth() {
     }
   };
 
-  const finishRegistration = async () => {
-    if (!canCreateAccount(termsRead, agreed)) { setTermsOpen(true); return; }
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.rpc('accept_signup_terms');
-      if (error) throw error;
-      await refreshRegistration();
-    } catch { toast.error('Could not save your agreement. Please try again.'); }
-    finally { setIsLoading(false); }
-  };
-
   const inputCls = 'h-11 rounded-md bg-muted/50 pl-10 focus-visible:ring-primary/40 border border-input text-sm placeholder:text-muted-foreground';
 
   const passwordField = (id: string, withPlaceholder: boolean) => (
@@ -193,9 +181,6 @@ export default function Auth() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         className={`${inputCls} pr-10`}
-        autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
-        minLength={6}
-        maxLength={72}
         required
       />
       <Button
@@ -217,7 +202,6 @@ export default function Auth() {
       <Input
         id={id}
         type="email"
-        autoComplete="email"
         placeholder={t.auth.emailPlaceholder}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -246,19 +230,8 @@ export default function Auth() {
           </div>
           {searchParams.get('password') === 'updated' && <p role="status" className="text-center text-sm text-primary">Your password has been updated. Sign in with your new password.</p>}
 
-          {authNotice && <p role="status" className="text-sm text-muted-foreground">{authNotice}</p>}
-          {loading || registrationLoading ? <p role="status" className="text-center text-sm text-muted-foreground">Checking your account…</p> : user ? (
-            <section className="space-y-4">
-              <h2 className="font-display text-xl text-center">{accountError ? 'Account check unavailable' : !consented ? 'Complete your signup' : 'Awaiting approval'}</h2>
-              <p className="text-sm text-muted-foreground">{accountError || (!consented ? 'Read and accept the Terms & Policies to complete your NIMALUNDA registration.' : 'Your account has been registered. Access to the tools is available after your account is approved.')}</p>
-              {!consented && !accountError && <><Button variant="outline" className="w-full" onClick={() => setTermsOpen(true)}>Read Terms & Policies</Button><div className="flex items-start gap-3"><Checkbox id="account-terms" checked={agreed} onCheckedChange={v => { if (!termsRead) setTermsOpen(true); else setAgreed(v === true); }} /><Label htmlFor="account-terms" className="leading-relaxed">I have read and agree to the Terms & Policies.</Label></div><Button className="auth-submit w-full" onClick={finishRegistration} disabled={isLoading || !canCreateAccount(termsRead, agreed)}>Complete registration</Button></>}
-              {(consented || accountError) && <Button variant="outline" className="w-full" disabled={isLoading} onClick={() => void refreshRegistration()}>Check account status</Button>}
-              <Button variant="link" className="w-full" onClick={async () => { const { error } = await supabase.auth.signOut(); if (error) toast.error(error.message); }}>Sign out</Button>
-            </section>
-          ) : <>
-
           {/* Auth Tabs */}
-          <Tabs value={authMode} onValueChange={value => { setAuthMode(value); setConfirmationSent(false); setAuthNotice(''); }} className="w-full">
+          <Tabs value={authMode} onValueChange={setAuthMode} className="w-full">
             <TabsList className="grid h-10 w-full grid-cols-2 rounded-lg bg-primary/10 p-0.5">
               <TabsTrigger value="signin" className="rounded-md text-sm font-medium data-[state=active]:text-primary">
                 {t.auth.signIn}
@@ -299,7 +272,7 @@ export default function Auth() {
 
             {/* SIGN UP TAB */}
             <TabsContent value="signup" className="mt-5">
-              {confirmationSent ? <div className="space-y-4"><h2 className="text-center font-display text-xl">Confirm your email</h2><p className="text-center text-sm text-muted-foreground">A confirmation link was requested for {email}. Open it to verify your account.</p><Button variant="outline" className="w-full" onClick={handleResendConfirmation} disabled={isLoading}>Resend confirmation</Button><Button variant="link" className="w-full" onClick={() => { setAuthMode('signin'); setConfirmationSent(false); }}>Back to sign in</Button></div> : <form onSubmit={handleSignUp} className="space-y-4">
+              <form onSubmit={handleSignUp} className="space-y-4">
                 
                 <div className="space-y-2">
                   <Label htmlFor="signup-name" className="text-sm font-medium">
@@ -310,7 +283,6 @@ export default function Auth() {
                     <Input
                       id="signup-name"
                       type="text"
-                      autoComplete="name"
                       placeholder={t.auth.fullNamePlaceholder}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -384,7 +356,7 @@ export default function Auth() {
                     Didn't receive an email? Resend confirmation
                   </Button>
                 </div>
-              </form>}
+              </form>
             </TabsContent>
           </Tabs>
 
@@ -393,9 +365,8 @@ export default function Auth() {
           </div>
           <Button type="button" variant="outline" className="h-12 w-full gap-2 rounded-md border-border bg-muted/30 font-semibold" onClick={handleGoogle} disabled={isLoading || (authMode === 'signup' && !canCreateAccount(termsRead, agreed))}>
             <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            {authMode === 'signup' ? 'Sign up with Google' : 'Sign in with Google'}
+            Continue with Google
           </Button>
-          </>}
 
           {/* Footer text */}
           <Button variant="link" className="h-auto self-center whitespace-normal text-xs text-muted-foreground" onClick={() => setTermsOpen(true)}>NIMALUNDA · Terms & Policies</Button>
@@ -404,7 +375,7 @@ export default function Auth() {
 
       {/* TERMS DIALOG */}
       <Dialog open={termsOpen} onOpenChange={setTermsOpen}>
-        <DialogContent className="dark auth-page bg-background text-foreground flex h-[85dvh] max-w-3xl flex-col gap-3 p-4 sm:p-6">
+        <DialogContent className="dark bg-background text-foreground flex h-[90vh] max-w-4xl flex-col gap-3 p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 font-display">
               <ShieldCheck className="h-5 w-5 text-primary" /> {BRAND} Terms & Policies

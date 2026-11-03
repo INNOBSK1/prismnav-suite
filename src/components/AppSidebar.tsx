@@ -26,16 +26,6 @@ export function AppSidebar() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(false);
-  const { user } = useAuth();
-  const [profile, setProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null);
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void supabase.from('profiles').select('full_name, avatar_url').eq('id', user.id).maybeSingle().then(({ data }) => { if (active) setProfile(data); });
-    return () => { active = false; };
-  }, [user?.id]);
-  const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Account';
-  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
 
   const handleLogout = async () => {
     setSigningOut(true);
@@ -62,10 +52,6 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
-        <div className="flex min-w-0 items-center gap-3 border-b border-sidebar-border p-3 group-data-[collapsible=icon]:p-2">
-          <Avatar className="h-8 w-8 shrink-0"><AvatarImage src={avatarUrl} alt="Profile photo" referrerPolicy="no-referrer" /><AvatarFallback>{displayName.slice(0, 1).toUpperCase()}</AvatarFallback></Avatar>
-          <div className="min-w-0 group-data-[collapsible=icon]:hidden"><p translate="no" className="notranslate truncate text-sm font-medium">{displayName}</p><p translate="no" className="notranslate truncate text-xs text-muted-foreground">{user?.email}</p></div>
-        </div>
         <SidebarGroup>
           <SidebarGroupLabel>{t.sidebar.sites}</SidebarGroupLabel>
           <SidebarGroupContent>
