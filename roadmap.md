@@ -1,6 +1,6 @@
 # Requested updates
-- [ ] Fix Google OAuth initiation on fbmstwo.netlify.app without changing email/password login.
-- [ ] Verify Netlify-compatible Google return URL and report required hosted settings.
+- [x] Fix Google OAuth initiation on fbmstwo.netlify.app without changing email/password login (verified using local code served under the production origin).
+- [ ] Complete deployed Google return verification — blocked until https://fbmstwo.netlify.app/** is added to Auth Redirect URLs and the updated source is deployed on Netlify.
 - [x] Single-section auth page with logo and background.
 - [x] Clear signup terms and agreement presentation.
 - [x] Sidebar-only embedded About Us and logout.
