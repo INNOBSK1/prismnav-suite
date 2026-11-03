@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { validRecoveryCode, validNewPassword } from '@/lib/password-recovery';
 import landscape from '@/assets/green-horizon.jpg';
-import logoAsset from '@/assets/nimalunda-login-logo.asset.json';
+import logoUrl from '@/assets/nimalunda-logo.png';
+const logoAsset = { url: logoUrl };
 import { useAuth } from '@/hooks/useAuth';
 
 export default function PasswordRecovery() {
