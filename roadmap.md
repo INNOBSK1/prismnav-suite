@@ -1,4 +1,6 @@
 # Requested updates
+- [ ] Fix Google sign-in on fbmstwo.netlify.app without changing email login or authentication settings.
+- [ ] Verify production OAuth initiation and document exact button changes.
 - [x] Single-section auth page with logo and background.
 - [x] Clear signup terms and agreement presentation.
 - [x] Sidebar-only embedded About Us and logout.
