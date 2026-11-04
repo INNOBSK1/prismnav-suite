@@ -1,4 +1,3 @@
-```tsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
@@ -33,6 +32,7 @@ import landscape from '@/assets/green-horizon.jpg';
 import { useTermsHtml, termsArticleCls } from '@/components/TermsText';
 import logo from '@/assets/nimalunda-logo.png';
 import { canCreateAccount } from '@/lib/signup-agreement';
+import { signInWithGoogle } from '@/lib/google-auth';
 
 const BRAND = 'NIMALUNDA';
 
@@ -246,22 +246,13 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          // IMPORTANT:
-          // Google authentication goes through Supabase first,
-          // then Supabase sends the user directly to the dashboard.
-          redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            prompt: 'select_account',
-          },
-        },
-      });
+      const result = await signInWithGoogle();
 
-      if (error) {
-        toast.error(error.message || t.auth.unexpectedError);
+      if (result.error) {
+        toast.error(result.error.message || t.auth.unexpectedError);
+        return;
       }
+      if (result.redirected) return;
     } catch {
       toast.error(t.auth.unexpectedError);
     } finally {
@@ -710,4 +701,3 @@ export default function Auth() {
     </div>
   );
 }
-```
