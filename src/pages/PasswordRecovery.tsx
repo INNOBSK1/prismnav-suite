@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { validRecoveryCode, validNewPassword } from '@/lib/password-recovery';
 import landscape from '@/assets/green-horizon.jpg';
-import logoAsset from '@/assets/nimalunda-login-logo.asset.json';
+import logo from '@/assets/nimalunda-logo.png';
 
 export default function PasswordRecovery() {
   const [email, setEmail] = useState('');
@@ -99,19 +99,19 @@ export default function PasswordRecovery() {
       <main className="mx-auto flex min-h-full max-w-md items-center px-5 py-10">
         <section className="auth-frame w-full space-y-5 rounded-lg border border-border bg-card/95 p-6 sm:p-8">
           <div className="space-y-2 text-center">
-            <img src={logoAsset.url} alt="NIMALUNDA logo" className="mx-auto h-14 w-14 rounded-full" />
+            <img src={logo} alt="NIMALUNDA logo" width={56} height={56} className="mx-auto h-14 w-14 rounded-full object-cover ring-1 ring-primary/40" />
             <div translate="no" className="notranslate font-display text-xl">NIMALUNDA</div>
             <h1 className="font-display text-2xl tracking-normal">{step === 'password' ? 'Set a new password' : step === 'code' ? 'Check your email' : 'Forgot password?'}</h1>
           </div>
           {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
           {error && <p role="alert" className="text-sm text-foreground">{error}</p>}
           <form onSubmit={submit} className="space-y-4">
-            {step === 'email' && <div className="space-y-2"><Label htmlFor="recovery-email">Account email</Label><Input id="recovery-email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@gmail.com" /></div>}
-            {step === 'code' && <div className="space-y-2"><Label htmlFor="recovery-code">Reset code</Label><Input id="recovery-code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,8}" maxLength={8} required value={code} onChange={e => setCode(e.target.value)} /><p className="text-xs text-muted-foreground">If your email contains a reset link instead, open that link to choose a new password.</p></div>}
-            {step === 'password' && <><div className="space-y-2"><Label htmlFor="new-password">New password</Label><Input id="new-password" type="password" autoComplete="new-password" minLength={6} maxLength={72} required value={password} onChange={e => setPassword(e.target.value)} /></div><div className="space-y-2"><Label htmlFor="confirm-password">Confirm new password</Label><Input id="confirm-password" type="password" autoComplete="new-password" required value={confirmation} onChange={e => setConfirmation(e.target.value)} /></div></>}
-            <Button className="auth-submit h-11 w-full gap-2" disabled={busy}>{step === 'email' ? <Mail className="h-4 w-4" /> : <KeyRound className="h-4 w-4" />}{busy ? 'Please wait…' : step === 'email' ? 'Send recovery email' : step === 'code' ? 'Verify reset code' : 'Save new password'}</Button>
+            {step === 'email' && <div className="space-y-2"><Label htmlFor="recovery-email">Account email</Label><Input id="recovery-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></div>}
+            {step === 'code' && <div className="space-y-2"><Label htmlFor="recovery-code">Reset code</Label><Input id="recovery-code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,8}" required value={code} onChange={(event) => setCode(event.target.value)} /></div>}
+            {step === 'password' && <><div className="space-y-2"><Label htmlFor="new-password">New password</Label><Input id="new-password" type="password" autoComplete="new-password" minLength={6} maxLength={72} required value={password} onChange={(event) => setPassword(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="confirm-password">Confirm new password</Label><Input id="confirm-password" type="password" autoComplete="new-password" minLength={6} maxLength={72} required value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></div></>}
+            <Button className="auth-submit h-11 w-full gap-2" disabled={busy}>{step === 'email' ? <Mail className="h-4 w-4" /> : <KeyRound className="h-4 w-4" />}{busy ? 'Please wait…' : step === 'email' ? 'Send recovery email' : step === 'code' ? 'Verify code' : 'Update password'}</Button>
           </form>
-          {step === 'code' && <div className="flex justify-between gap-3"><Button variant="link" className="h-auto p-0 text-sm" disabled={busy} onClick={sendEmail}>Resend email</Button><Button variant="link" className="h-auto p-0 text-sm" disabled={busy} onClick={() => { setStep('email'); setError(''); setNotice(''); setCode(''); }}>Change email</Button></div>}
+          {step === 'code' && <div className="flex justify-between gap-3"><Button variant="link" className="h-auto p-0 text-sm" disabled={busy} onClick={sendEmail}>Resend email</Button><Button variant="link" className="h-auto p-0 text-sm" onClick={() => { setStep('email'); setError(''); setNotice(''); }}>Change email</Button></div>}
           <Button asChild variant="link" className="h-auto gap-2 p-0"><Link to="/auth"><ArrowLeft className="h-4 w-4" />Back to sign in</Link></Button>
         </section>
       </main>
