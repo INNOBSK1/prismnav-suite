@@ -49,11 +49,18 @@ export default function PasswordRecovery() {
       const { error: sendError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
-      if (sendError) throw sendError;
+
+      if (sendError) {
+        console.error(sendError);
+        setError(sendError.message);
+        return;
+      }
+
       setLastSent(Date.now());
       setNotice('If an account uses this email, a recovery email has been requested. Check your inbox and spam folder.');
       setStep('code');
     } catch (err) {
+      console.error(err);
       setError(err instanceof Error ? err.message : 'Could not request a recovery email. Please try again.');
     } finally { setBusy(false); }
   };
@@ -81,13 +88,18 @@ export default function PasswordRecovery() {
         setStep('password');
       } else {
         const { error: updateError } = await supabase.auth.updateUser({ password });
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error(updateError);
+          setError(updateError.message);
+          return;
+        }
         await supabase.auth.signOut();
         setPassword('');
         setConfirmation('');
         navigate('/auth?password=updated', { replace: true });
       }
     } catch (err) {
+      console.error(err);
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally { setBusy(false); }
   };
