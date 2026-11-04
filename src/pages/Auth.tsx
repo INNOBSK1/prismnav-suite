@@ -32,7 +32,6 @@ import landscape from '@/assets/green-horizon.jpg';
 import { useTermsHtml, termsArticleCls } from '@/components/TermsText';
 import logo from '@/assets/nimalunda-logo.png';
 import { canCreateAccount } from '@/lib/signup-agreement';
-import { signInWithGoogle } from '@/lib/google-auth';
 
 const BRAND = 'NIMALUNDA';
 
