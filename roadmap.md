@@ -1,4 +1,6 @@
 # Requested updates
+- [ ] Review uploaded Auth.tsx and stabilize sign-in/sign-up redirects directly to the dashboard.
+- [ ] Resolve the uploaded external-backend requirement without overwriting managed authentication configuration.
 - [x] Fix Google button initiation for fbmstwo.netlify.app without changing email login or authentication settings.
 - [x] Verify production-origin OAuth initiation and document exact button changes.
 - [ ] Complete Google login after deploying the updated source to Netlify and authorizing https://oauth.lovable.app/callback in the existing Google OAuth client (Google currently returns redirect_uri_mismatch).
