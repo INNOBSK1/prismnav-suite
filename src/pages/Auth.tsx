@@ -108,13 +108,13 @@ export default function Auth() {
     });
 
     if (!v.success) {
-      return toast.error(v.error.errors[0].message);
+      return toast.error(v.error.issues[0]?.message ?? 'Invalid information');
     }
 
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
@@ -127,6 +127,7 @@ export default function Auth() {
         );
       } else {
         toast.success(t.auth.signedIn);
+        if (data.session) navigate('/', { replace: true });
       }
     } catch {
       toast.error(t.auth.unexpectedError);
@@ -151,7 +152,7 @@ export default function Auth() {
     });
 
     if (!v.success) {
-      return toast.error(v.error.errors[0].message);
+      return toast.error(v.error.issues[0]?.message ?? 'Invalid information');
     }
 
     setIsLoading(true);
@@ -181,6 +182,7 @@ export default function Auth() {
             ? t.auth.accountCreated
             : `${t.auth.accountCreated} Check your email to confirm.`
         );
+        if (data.session) navigate('/', { replace: true });
       }
     } catch {
       toast.error(t.auth.unexpectedError);
@@ -209,19 +211,6 @@ export default function Auth() {
       if (error) {
         toast.error(error.message);
       } else {
-        await supabase.functions.invoke('send-email', {
-          body: {
-            to: email.trim(),
-            subject: `Confirm your ${BRAND} account`,
-            html: `<div style="font-family:DM Sans,Arial,sans-serif;padding:24px;color:#1b1b1b">
-              <h2 style="color:#166534;margin:0 0 12px">Welcome to ${BRAND} 🌱</h2>
-              <p>We just re-sent your confirmation email. Please check your inbox (and spam folder) for the link to verify your account.</p>
-              <p>If you didn't request this, you can safely ignore this message.</p>
-              <p style="margin-top:24px;color:#666;font-size:13px">— The ${BRAND} Team</p>
-            </div>`,
-          },
-        });
-
         toast.success('Confirmation email sent! Check your inbox.');
       }
     } catch {
