@@ -105,9 +105,9 @@ export default function Auth() {
       }
       if (data.session) {
         navigate('/', { replace: true });
-      } else {
-        toast.success('Account created. Please check your email to confirm your account.');
+        return;
       }
+      toast.success('Account created. Please sign in.');
     } catch { toast.error(t.auth.unexpectedError); }
     finally { setIsLoading(false); }
   };
